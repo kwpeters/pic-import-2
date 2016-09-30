@@ -4,7 +4,9 @@
   "description": "A tool to organize a media files",
   "main": "index.js",
   "dependencies": {
-    "@types/lodash": "^4.14.36"
+    "@types/bluebird": "^3.0.33",
+    "@types/lodash": "^4.14.36",
+    "bluebird": "^3.4.6"
   },
   "devDependencies": {
     "lodash": "^4.16.2"
