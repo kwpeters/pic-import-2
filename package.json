@@ -4,12 +4,13 @@
   "description": "A tool to organize a media files",
   "main": "index.js",
   "dependencies": {
-    "@types/bluebird": "^3.0.33",
-    "@types/lodash": "^4.14.36",
-    "bluebird": "^3.4.6"
+    "bluebird": "^3.4.6",
+    "lodash": "^4.16.2"
   },
   "devDependencies": {
-    "lodash": "^4.16.2"
+    "@types/bluebird": "^3.0.33",
+    "@types/lodash": "^4.14.36",
+    "@types/node": "^6.0.41"
   },
   "scripts": {
     "test": "echo \"Error: no test specified\" && exit 1",
