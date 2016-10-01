@@ -5,15 +5,20 @@
   "main": "index.js",
   "dependencies": {
     "bluebird": "^3.4.6",
-    "lodash": "^4.16.2"
+    "fs-extra": "^0.30.0",
+    "lodash": "^4.14.36"
   },
   "devDependencies": {
     "@types/bluebird": "^3.0.33",
+    "@types/fs-extra": "0.0.32",
     "@types/lodash": "^4.14.36",
-    "@types/node": "^6.0.41"
+    "@types/node": "^6.0.41",
+    "@types/tape": "^4.2.28",
+    "tap-dot": "^1.0.5",
+    "tape": "^4.6.2"
   },
   "scripts": {
-    "test": "echo \"Error: no test specified\" && exit 1",
+    "test": "npm run build && ./node_modules/.bin/tape dist/**/*.spec.js | tap-dot",
     "build": "rm -rf ./dist && tsc"
   },
   "repository": {
