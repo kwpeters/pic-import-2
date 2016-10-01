@@ -8,7 +8,6 @@ import {PathPart, reducePathParts} from "./pathHelpers";
 export class File {
 
     private _filePath: string;
-    private _stats: fs.Stats;
 
 
     constructor(pathPart: PathPart, ...pathParts: PathPart[]) {
@@ -100,6 +99,76 @@ export class File {
     }
 
 
+    public stats(): Promise<fs.Stats> {
+        return this.exists();
+    }
+
+
+    public statsSync(): fs.Stats {
+        return this.existsSync();
+    }
+
+
+    public copy(destDirOrFile: Directory | File, destFileName?: string): Promise<File> {
+        return new Promise<File>((resolve: (result: File) => void, reject: (err: any) => void) => {
+            let destFile: File;
+
+            if (destDirOrFile instanceof File) {
+                // The caller has specified the destination directory and file
+                // name in the form of a File.
+                destFile = destDirOrFile;
+            } else if (destDirOrFile instanceof Directory) {
+                // The caller has specified the destination directory and
+                // optionally a new file name.
+                if (destFileName === undefined) {
+                    destFile = new File(destDirOrFile.toString(), this.fileName);
+                } else {
+                    destFile = new File(destDirOrFile.toString(), destFileName);
+                }
+            }
+
+            fs.copy(this._filePath, destFile.toString(), (err) => {
+                if (err) {
+                    reject(err);
+                    return;
+                }
+                resolve(destFile);
+            });
+
+        });
+    }
+
+
+    public copySync() {
+
+    }
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+    public writeSync(text: string): void {
+        fs.outputFileSync(this._filePath, text);
+    };
 
 }
 

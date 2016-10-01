@@ -2,6 +2,7 @@ import * as fs from "fs";
 import * as tape from "tape";
 import {File} from "./file";
 import {Directory} from "./directory";
+import createStream = tape.createStream;
 
 tape(
     "File constructor",
@@ -254,6 +255,132 @@ tape(
             }
         );
 
+
+        t.test("copy()",
+            function (t: tape.Test): void {
+
+                const destDir: Directory = new Directory("tmp");
+
+                function setup(): void {
+                    destDir.emptySync();
+                }
+
+
+                t.test("will copy the file to the specified destination directory",
+                    function (t: tape.Test): void {
+                        setup();
+
+                        const srcFile: File = new File("test/input/2015-03-11 09.05.32.jpg");
+                        srcFile.copy(destDir)
+                            .then((destFile: File) => {
+                                t.equal(destFile.toString(), "tmp/2015-03-11 09.05.32.jpg");
+                                t.assert(destFile.existsSync());
+                                t.end();
+                            });
+                    }
+                );
+
+
+                t.test("will rename the file when a directory and filename is specified",
+                    function (t: tape.Test): void {
+                        setup();
+
+                        const srcFile: File = new File("test/input/2015-03-11 09.05.32.jpg");
+                        srcFile.copy(destDir, "foo.jpg")
+                            .then((destFile: File) => {
+                                t.equal(destFile.toString(), "tmp/foo.jpg");
+                                t.assert(destFile.existsSync());
+                                t.end();
+                            });
+                    }
+                );
+
+
+                t.test("will rename the file when a destination File is specified",
+                    function (t: tape.Test): void {
+                        setup();
+
+                        const srcFile: File = new File("test/input/2015-03-11 09.05.32.jpg");
+                        const destFile: File = new File("tmp/foo2.jpg");
+                        srcFile.copy(destFile)
+                            .then((destFile: File) => {
+                                t.equal(destFile.toString(), "tmp/foo2.jpg");
+                                t.assert(destFile.existsSync());
+                                t.end();
+                            });
+                    }
+                );
+
+
+                t.test("will reject if the source file does not exist",
+                    function (t: tape.Test): void {
+                        setup();
+
+                        const srcFile: File = new File("test/input/does_not_exist.jpg");
+                        srcFile.copy(destDir)
+                            .catch(() => {
+                                const destFile: File = new File(destDir.toString(), "does_not_exist.jpg");
+                                t.assert(!destFile.existsSync());
+                                t.end();
+                            });
+                    }
+                );
+
+
+                t.test("will overwrite an existing destination file",
+                    function (t: tape.Test): void {
+                        setup();
+
+                        // Create a small text file and get its size.
+                        const origFile: File = new File(destDir, "test.txt");
+                        origFile.writeSync("abc");
+                        const origSize: number = origFile.statsSync().size;
+
+                        // Create another file and get its size.
+                        const newFile: File = new File(destDir, "source.txt");
+                        newFile.writeSync("abcdefghijklmnopqrstuvwxyz");
+                        const newSize: number = newFile.statsSync().size;
+
+                        // Copy newFile over origFile.  Get the size of the copied file.
+                        // It should equal the size of newFile.
+                        newFile.copy(origFile)
+                            .then(
+                                (destFile: File) => {
+                                    t.equal(destFile.statsSync().size, newSize);
+                                    t.notEqual(destFile.statsSync().size, origSize);
+                                    t.end();
+                                }
+                            );
+                    }
+                );
+
+
+            }
+        );
+
+
+        t.test("copySync()",
+            function (t: tape.Test): void {
+
+                const destDir: Directory = new Directory("tmp");
+
+                function setup(): void {
+                    destDir.emptySync();
+                }
+
+                t.test("will copy the file to the specified destination directory",
+                    function (t: tape.Test): void {
+                        const srcFile: File = new File("test/input/2015-03-11 09.05.32.jpg");
+                        const destFile: File = srcFile.copySync(destDir);
+                        t.equal(destFile.toString(), "tmp/2015-03-11 09.05.32.jpg");
+                        t.assert(destFile.existsSync());
+                        t.end();
+                    }
+                );
+
+
+            }
+        );
 
     }
 );
