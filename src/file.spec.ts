@@ -1,8 +1,9 @@
 import * as fs from "fs";
+import * as path from "path";
 import * as tape from "tape";
 import {File} from "./file";
 import {Directory} from "./directory";
-import createStream = tape.createStream;
+
 
 tape(
     "File constructor",
@@ -368,8 +369,10 @@ tape(
                     destDir.emptySync();
                 }
 
+
                 t.test("will copy the file to the specified destination directory",
                     function (t: tape.Test): void {
+                        setup();
                         const srcFile: File = new File("test/input/2015-03-11 09.05.32.jpg");
                         const destFile: File = srcFile.copySync(destDir);
                         t.equal(destFile.toString(), "tmp/2015-03-11 09.05.32.jpg");
@@ -379,8 +382,428 @@ tape(
                 );
 
 
+                t.test("will rename the file when a directory and filename is specified",
+                    function (t: tape.Test): void {
+                        setup();
+                        const srcFile: File = new File("test/input/2015-03-11 09.05.32.jpg");
+                        const destFile: File = srcFile.copySync(destDir, "foo.jpg");
+                        t.equal(destFile.toString(), "tmp/foo.jpg");
+                        t.assert(destFile.existsSync());
+                        t.end();
+                    }
+                );
+
+
+                t.test("will rename the file when a destination File is specified",
+                    function (t: tape.Test): void {
+                        setup();
+                        const srcFile: File  = new File("test/input/2015-03-11 09.05.32.jpg");
+                        let destFile: File = new File("tmp/foo2.jpg");
+                        destFile = srcFile.copySync(destFile);
+                        t.equal(destFile.toString(), "tmp/foo2.jpg");
+                        t.assert(destFile.existsSync());
+                        t.end();
+                    }
+                );
+
+
+                t.test("will throw an exception if the source file does not exist",
+                    function (t: tape.Test): void {
+                        setup();
+                        const srcFile: File = new File("test/input/does_not_exist.jpg");
+                        t.throws(
+                            () => { srcFile.copySync(destDir); },
+                            /no such file or directory/,
+                            "Should throw the expected exception"
+                        );
+                        t.assert(!new File(destDir.toString(), "does_not_exist.jpg").existsSync());
+                        t.end();
+                    }
+                );
+
+
+                t.test("will overwrite an existing destination file",
+                    function (t: tape.Test): void {
+                        setup();
+
+                        // Create a small text file and get its size.
+                        const origFile: File = new File(destDir, "test.txt");
+                        origFile.writeSync("abc");
+                        const origSize: number = origFile.statsSync().size;
+
+                        // Create another file and get its size.
+                        const newFile: File = new File(destDir, "source.txt");
+                        newFile.writeSync("abcdefghijklmnopqrstuvwxyz");
+                        const newSize: number = newFile.statsSync().size;
+
+                        // Copy newFile over origFile.  Get the size of the copied file.
+                        // It should equal the size of newFile.
+                        newFile.copySync(origFile);
+                        t.equal(origFile.statsSync().size, newSize);
+                        t.notEqual(origFile.statsSync().size, origSize);
+                        t.end();
+                    }
+                );
             }
         );
+
+
+        t.test("move()",
+            function (t: tape.Test): void {
+
+                const tmpDir: Directory = new Directory("tmp");
+                const destDir: Directory = new Directory(tmpDir, "dest");
+                const srcDir: Directory = new Directory(tmpDir, "src");
+                let srcFile: File;
+
+
+                function setup(): void {
+                    // Empty the tmp directory.
+                    tmpDir.emptySync();
+                    // Stage srcFile in srcDir.
+                    srcFile = new File("test/input/2015-03-11 09.05.32.jpg").copySync(srcDir);
+                }
+
+
+                t.test("should move the file to the specified destination directory",
+                    function (t: tape.Test): void {
+                        setup();
+                        srcFile.move(destDir)
+                            .then((destFile: File) => {
+                                t.equal(destFile.toString(), "tmp/dest/2015-03-11 09.05.32.jpg");
+                                t.assert(destFile.existsSync());
+                                t.false(srcFile.existsSync());
+                                t.end();
+                            });
+                    }
+                );
+
+
+                t.test("should rename the file when a directory and filename are specified",
+                    function (t: tape.Test): void {
+                        setup();
+                        srcFile.move(destDir, "foo.jpg")
+                            .then((destFile: File) => {
+                                t.equal(destFile.toString(), "tmp/dest/foo.jpg");
+                                t.assert(destFile.existsSync());
+                                t.false(srcFile.existsSync());
+                                t.end();
+                            });
+                    }
+                );
+
+
+                t.test("should rename the file when a destination File is specified",
+                    function (t: tape.Test): void {
+                        setup();
+                        const destFile: File = new File(destDir, "foo2.jpg");
+                        srcFile.move(destFile)
+                            .then((destFile: File) => {
+                                t.equal(destFile.toString(), "tmp/dest/foo2.jpg");
+                                t.assert(destFile.existsSync());
+                                t.false(srcFile.existsSync());
+                                t.end();
+                            });
+                    }
+                );
+
+
+                t.test("should reject if the source file does not exist",
+                    function (t: tape.Test): void {
+                        setup();
+                        const srcFile: File = new File("test/input/does_not_exist.jpg");
+
+                        srcFile.move(destDir)
+                            .catch(() => {
+                                const destFile: File = new File(destDir, "does_not_exist.jpg");
+                                t.false(destFile.existsSync());
+                                t.end();
+                            });
+
+                    }
+                );
+
+
+                t.test("should overwrite the destination file if it already exists",
+                    function (t: tape.Test): void {
+                        setup();
+
+                        // Create a small text file and get its size
+                        const origFile: File = new File(destDir, "test.txt");
+                        origFile.writeSync("abc");
+
+                        // Create another file and get its size.
+                        const newFile: File = new File(destDir, "source.txt");
+                        newFile.writeSync("abcdefghijklmnopqrstuvwxyz");
+                        const newSize: number = newFile.statsSync().size;
+
+                        // Move newFile over origFile.  Get the size of the resulting file.
+                        // It should equal the size of newFile.
+                        newFile.move(origFile)
+                            .then((destFile: File) => {
+                                t.equal(destFile.statsSync().size, newSize);
+                                t.false(newFile.existsSync());
+                                t.end();
+                            });
+                    }
+                );
+
+            }
+        );
+
+
+        t.test("moveSync()",
+            function (t: tape.Test): void {
+
+                const tmpDir: Directory = new Directory("tmp");
+                const destDir: Directory = new Directory(tmpDir, "dest");
+                const srcDir: Directory = new Directory(tmpDir, "src");
+                let srcFile: File;
+
+
+                function setup(): void {
+                    // Empty the tmp directory.
+                    tmpDir.emptySync();
+                    // Stage srcFile in srcDir.
+                    srcFile = new File("test/input/2015-03-11 09.05.32.jpg").copySync(srcDir);
+                }
+
+
+                t.test("should move the file to the specified destination directory",
+                    function (t: tape.Test): void {
+                        setup();
+                        const destFile: File = srcFile.moveSync(destDir);
+                        t.equal(destFile.toString(), "tmp/dest/2015-03-11 09.05.32.jpg");
+                        t.assert(destFile.existsSync());
+                        t.false(srcFile.existsSync());
+                        t.end();
+                    }
+                );
+
+
+                t.test("should rename the file when a directory and filename are specified",
+                    function (t: tape.Test): void {
+                        setup();
+                        const destFile: File = srcFile.moveSync(destDir, "foo.jpg");
+                        t.equal(destFile.toString(), "tmp/dest/foo.jpg");
+                        t.assert(destFile.existsSync());
+                        t.false(srcFile.existsSync());
+                        t.end();
+
+                    }
+                );
+
+
+                t.test("should rename the file when a destination File is specified",
+                    function (t: tape.Test): void {
+                        setup();
+                        let destFile: File = new File(destDir, "foo2.jpg");
+                        destFile = srcFile.moveSync(destFile);
+                        t.equal(destFile.toString(), "tmp/dest/foo2.jpg");
+                        t.assert(destFile.existsSync());
+                        t.false(srcFile.existsSync());
+                        t.end();
+                    }
+                );
+
+
+                t.test("should throw an exception if the source file does not exist",
+                    function (t: tape.Test): void {
+                        setup();
+                        const srcFile: File = new File("test/input/does_not_exist.jpg");
+                        t.throws(
+                            () => { srcFile.moveSync(destDir); },
+                            /no such file or directory/,
+                            "Should throw the expected exception"
+                        );
+                        t.false(new File(destDir.toString(), "does_not_exist.jpg").existsSync());
+                        t.end();
+                    }
+                );
+
+
+                t.test("will overwrite the destination file if it already exists",
+                    function (t: tape.Test): void {
+                        setup();
+
+                        // Create a small text file and get its size
+                        const origFile: File = new File(destDir, "test.txt");
+                        origFile.writeSync("abc");
+
+                        // Create another file and get its size.
+                        const newFile: File = new File(destDir, "source.txt");
+                        newFile.writeSync("abcdefghijklmnopqrstuvwxyz");
+                        const newSize: number = newFile.statsSync().size;
+
+                        // Move newFile over origFile.  Get the size of the resulting file.
+                        // It should equal the size of newFile.
+                        const destFile: File = newFile.moveSync(origFile);
+                        t.equal(destFile.statsSync().size, newSize);
+                        t.false(newFile.existsSync());
+                        t.end();
+                    }
+                );
+
+            }
+        );
+
+
+        t.test("write()",
+            function (t: tape.Test): void {
+
+                t.test("creates necessary directories",
+                    function (t: tape.Test): void {
+                        const dir: Directory = new Directory(path.join("tmp", "foo", "bar"));
+                        const outFile: File = new File(dir, "test.txt");
+
+                        outFile.write("hello world")
+                            .then(() => {
+                                t.assert(outFile.existsSync());
+                                t.end();
+                            });
+
+                    }
+                );
+
+
+                t.test("writes the specified text to the file",
+                    function (t: tape.Test): void {
+                        const dir: Directory = new Directory("tmp");
+                        const outFile: File = new File(dir, "test.txt");
+
+                        outFile.write("12345")
+                            .then(() => {
+                                return outFile.read();
+                            })
+                            .then((text) => {
+                                t.equal(text, "12345");
+                                t.end();
+                            });
+
+                    }
+                );
+
+
+            }
+        );
+
+
+        t.test("writeSync()",
+            function (t: tape.Test): void {
+
+                t.test("creates necessary directories",
+                    function (t: tape.Test): void {
+                        const dir: Directory = new Directory(path.join("tmp", "foo", "bar"));
+                        const outFile: File = new File(dir, "test.txt");
+
+                        outFile.writeSync("hello world");
+                        t.assert(outFile.existsSync());
+                        t.end();
+
+                    }
+                );
+
+
+                t.test("writes the specified text to the file",
+                    function (t: tape.Test): void {
+                        const dir: Directory = new Directory("tmp");
+                        const outFile: File = new File(dir, "test.txt");
+
+                        outFile.writeSync("12345");
+                        const actualText: string = outFile.readSync();
+                        t.equal(actualText, "12345");
+                        t.end();
+                    }
+                );
+
+
+            }
+        );
+
+
+        t.test("read()",
+            function (t: tape.Test): void {
+
+                const tmpDir: Directory = new Directory("tmp");
+
+                function setup(): void {
+                    tmpDir.emptySync();
+                }
+
+
+                t.test("can read the contents of a text file.",
+                    function (t: tape.Test): void {
+                        setup();
+                        const file: File = new File(tmpDir, "testFile.txt");
+                        file.writeSync("xyzzy");
+
+                        file.read()
+                            .then((text: string) => {
+                                t.equal(text, "xyzzy");
+                                t.end();
+                            });
+                    }
+                );
+
+                t.test("will reject if the file being read does not exist",
+                    function (t: tape.Test): void {
+                        setup();
+                        const file: File = new File(tmpDir, "does_not_exist.txt");
+                        file.read()
+                            .then(() => {
+                                t.fail("The file should not have been read successfully.");
+                            })
+                            .catch(() => {
+                                t.pass("Reading a non-existent file rejected appropriately.");
+                                t.end();
+                            });
+
+                    }
+                );
+
+            }
+        );
+
+
+        t.test("readSync()",
+            function (t: tape.Test): void {
+
+                const tmpDir: Directory = new Directory("tmp");
+
+                function setup(): void {
+                    tmpDir.emptySync();
+                }
+
+
+                t.test("can read the contents of a text file.",
+                    function (t: tape.Test): void {
+                        setup();
+                        const file: File = new File(tmpDir, "testFile.txt");
+                        file.writeSync("xyzzy");
+
+                        const text: string = file.readSync();
+                        t.equal(text, "xyzzy");
+                        t.end();
+                    }
+                );
+
+                t.test("will reject if the file being read does not exist",
+                    function (t: tape.Test): void {
+                        setup();
+                        const file: File = new File(tmpDir, "does_not_exist.txt");
+                        t.throws(
+                            () => { file.readSync(); },
+                            /no such file or directory/,
+                            "Should throw the expected exception"
+                        );
+                        t.false(file.existsSync(), "The file should not be created");
+                        t.end();
+                    }
+                );
+
+            }
+        );
+
 
     }
 );

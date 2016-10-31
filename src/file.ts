@@ -139,36 +139,143 @@ export class File {
     }
 
 
-    public copySync() {
+    public copySync(destDirOrFile: Directory | File, destFileName?: string): File {
 
+        let destFile: File;
+
+        if (destDirOrFile instanceof File) {
+            // The caller has specified the destination directory and file name
+            // in the form of a File.
+            destFile = destDirOrFile;
+        } else if (destDirOrFile instanceof Directory) {
+            // The caller has specified the destination directory and optionally
+            // a new file name.
+            if (destFileName === undefined) {
+                destFile = new File(destDirOrFile.toString(), this.fileName);
+            } else {
+                destFile = new File(destDirOrFile.toString(), destFileName);
+            }
+        }
+
+        fs.copySync(this._filePath, destFile.toString());
+        return destFile;
     }
 
 
+    /**
+     * Moves this file to the specified destination.
+     * @method
+     * @param {Directory|File} destDirOrFile - The destination directory or file name
+     * @param {string} [destFilename] - If destDirOrFile is a Directory, this optional
+     * parameter can specify the name of the destination file.  If not specified, the
+     * file name of this file is used.
+     * @returns {Promise} A promise that is resolved with the destination File object
+     * if successful.  This promise is rejected if an error occurred.
+     */
+    public  move(destDirOrFile: Directory | File, destFileName?: string): Promise<File> {
+        return new Promise<File>((resolve: (result: File) => void, reject: (err: any) => void) => {
+            let destFile: File;
+
+            if (destDirOrFile instanceof File) {
+                // The caller has specified the destination directory and file
+                // name in the form of a File.
+                destFile = destDirOrFile;
+            } else if (destDirOrFile instanceof Directory) {
+                // The caller has specified the destination directory and
+                // optionally a new file name.
+                if (destFileName === undefined) {
+                    destFile = new File(destDirOrFile.toString(), this.fileName);
+                } else {
+                    destFile = new File(destDirOrFile.toString(), destFileName);
+                }
+            }
+
+            fs.move(this._filePath, destFile.toString(), {clobber: true}, (err: any) => {
+                if (err) {
+                    reject(err);
+                    return;
+                }
+                resolve(destFile);
+            });
+
+        });
+    }
 
 
+    /**
+     * Moves this file to the specified destination.
+     * @method
+     * @param {Directory|File} destDirOrFile - The destination directory or file name
+     * @param {string} [destFilename] - If destDirOrFile is a Directory, this optional
+     * parameter can specify the name of the destination file.  If not specified, the
+     * file name of this file is used.
+     * @returns {File} A File object representing the destination file
+     */
+    public moveSync(destDirOrFile: Directory | File, destFileName?: string): File {
+        //var srcFileParts = this.split(),
+        let destFile: File;
+
+        if (destDirOrFile instanceof File) {
+            // The caller has specified the destination directory and file name in the
+            // form of a File.
+            destFile = destDirOrFile;
+        } else if (destDirOrFile instanceof Directory) {
+            // The caller has specified the destination directory and optionally a new
+            // file name.
+
+            if (destFileName === undefined) {
+                destFile = new File(destDirOrFile.toString(), this.fileName);
+            } else {
+                destFile = new File(destDirOrFile.toString(), destFileName);
+            }
+        }
+
+        // There is no easy way to move a file using fs.  fs.renameSync() will not
+        // work when crossing partitions or using a virtual filesystem that does not
+        // support moving files.  As a fallback, we will copy the file and then delete
+        // this file.
+        this.copySync(destFile);
+        fs.unlinkSync(this._filePath);
+        return destFile;
+    }
 
 
+    public write(text: string): Promise<undefined> {
+        return new Promise<undefined>((resolve: (result: undefined) => void, reject: (err: any) => void) => {
 
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
+            fs.outputFile(this._filePath, text, (err) => {
+                if (err) {
+                    reject(err);
+                    return;
+                }
+                resolve(undefined);
+            });
+        });
+    }
 
 
     public writeSync(text: string): void {
         fs.outputFileSync(this._filePath, text);
     };
+
+
+    public read(): Promise<string> {
+        return new Promise<string>((resolve: (result: string) => void, reject: (err: any) => void) => {
+
+            fs.readFile(this._filePath, {encoding: "utf8"}, (err, text) => {
+                if (err) {
+                    reject(err);
+                    return;
+                }
+                resolve(text);
+            });
+        });
+    }
+
+
+    public readSync(): string {
+        return fs.readFileSync(this._filePath, {encoding: "utf8"});
+    }
 
 }
 

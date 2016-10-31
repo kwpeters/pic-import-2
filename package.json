@@ -1,7 +1,7 @@
 {
   "name": "pic-import-2",
   "version": "0.0.1",
-  "description": "A tool to organize a media files",
+  "description": "A tool to organize media files",
   "main": "index.js",
   "dependencies": {
     "bluebird": "^3.4.6",
@@ -10,15 +10,16 @@
   },
   "devDependencies": {
     "@types/bluebird": "^3.0.33",
-    "@types/fs-extra": "0.0.32",
+    "@types/fs-extra": "0.0.33",
     "@types/lodash": "^4.14.36",
     "@types/node": "^6.0.41",
     "@types/tape": "^4.2.28",
     "tap-dot": "^1.0.5",
-    "tape": "^4.6.2"
+    "tape": "^4.6.2",
+    "typescript": "^2.0.3"
   },
   "scripts": {
-    "test": "npm run build && ./node_modules/.bin/tape dist/**/*.spec.js | tap-dot",
+    "test": "npm run build && ./node_modules/.bin/tape dist/**/*.spec.js",
     "build": "rm -rf ./dist && tsc"
   },
   "repository": {
