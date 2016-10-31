@@ -1,0 +1,4 @@
+
+
+- Implement a "lint" task to run TSLint.
+  Possibly add ESLint support via typescript-eslint-parser.

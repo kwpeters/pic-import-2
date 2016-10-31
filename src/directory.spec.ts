@@ -35,7 +35,6 @@ tape(
         );
 
 
-        // left off here.
         t.test("will accept an initial Directory argument",
             function (t: tape.Test): void {
                 const dirA: Directory = new Directory("foo");
@@ -188,7 +187,7 @@ tape(
         );
 
 
-        // todo: left off here.  Need to implement getSubdirectories()
+        // Todo: left off here.
         t.test("exists()",
             function (t: tape.Test): void {
 
