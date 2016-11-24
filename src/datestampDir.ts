@@ -7,7 +7,15 @@ const datestampRegex: RegExp = /(\d{4})[-_](\d{2})[-_](\d{2})/;
 export class DatestampDir {
 
 
-    public static test(path: string): Datestamp {
+    /**
+     * Creates a corresponding Datestamp object if the specified path matches
+     * the pattern of a timestamped directory.
+     * @static
+     * @param {string} path - The path to test
+     * @returns {Datestamp | null} The corresponding Datestamp if the path is a
+     * timestamped directory.  null otherwise.
+     */
+    public static test(path: string): Datestamp | null {
         const match: RegExpExecArray | null = datestampRegex.exec(path);
 
         if (!match) {
