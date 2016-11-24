@@ -113,6 +113,84 @@ export class Directory {
     }
 
 
+    public exists():Promise<fs.Stats> {
+        return new Promise<fs.Stats>((resolve: (result: fs.Stats) => void, reject: (err: any) => void) => {
+            fs.stat(
+                this._dirPath,
+                (err: NodeJS.ErrnoException, stats: Stats) => {
+                    if (stats && stats.isDirectory()) {
+                        resolve(stats);
+                        return;
+                    }
+
+                    // Either fs.stat() failed or it is not a directory.
+                    resolve(undefined);
+                }
+            );
+        });
+    }
+
+
+    public existsSync(): fs.Stats|false {
+        let stats: fs.Stats;
+
+        try {
+            stats = fs.statSync(this._dirPath);
+        } catch (ex) {
+            return false;
+        }
+
+        return stats.isDirectory() ? stats : false;
+    }
+
+
+    /**
+     * Ensures that this Directory exists.  If it does not, it is created.
+     * @method
+     * @returns {Promise<void>} A Promise that is fulfilled once the directory exists.
+     */
+    public ensureExists(): Promise<void> {
+        return new Promise<void>((resolve: () => void, reject: (err: Error) => void) => {
+            fs.ensureDir(this._dirPath, (err: Error) => {
+                if (err) {
+                    reject(err);
+                } else {
+                    resolve();
+                }
+            });
+        });
+    }
+
+
+    /**
+     * Ensures that this Directory exists.  If it does not, it is created.
+     * @method
+     */
+    public ensureExistsSync(): void {
+        fs.ensureDirSync(this._dirPath);
+    }
+
+
+    /**
+     * Deletes the contents of this Directory.
+     * @method
+     * @returns {Promise<void>} A Promise that is fulfilled when this Directory
+     * is successfully emptied.  The Promise is rejected if an error occurs.
+     */
+    public empty(): Promise<void> {
+        return new Promise<void>((resolve, reject) => {
+            fs.emptyDir(this._dirPath, (err: Error) => {
+                if (err) {
+                    reject(err);
+                    return;
+                }
+
+                resolve();
+            });
+        });
+    }
+
+
     ////////////////////////////////////////////////////////////////////////////////
     // Omitted for now...
     ////////////////////////////////////////////////////////////////////////////////

@@ -1,7 +1,7 @@
 import * as path from "path";
 import * as tape from "tape";
+import * as fs from "fs-extra";
 import {Directory} from "./directory";
-
 
 
 tape(
@@ -191,8 +191,193 @@ tape(
         t.test("exists()",
             function (t: tape.Test): void {
 
+                t.test("will be fulfuille with a truthy stats object when given an existing directory",
+                    function (t: tape.Test): void {
+
+                        const dir: Directory = new Directory(__dirname);
+
+                        dir.exists()
+                            .then((stats) => {
+                                t.true(stats);
+                                t.true(stats.isDirectory());
+                                t.end();
+                            });
+                    }
+                );
 
 
+                t.test("will be resolved with false when given a directory that does not exist",
+                    function (t: tape.Test): void {
+
+                        const dir: Directory = new Directory("foo/bar");
+                        dir.exists()
+                            .then((stats) => {
+                                t.false(stats);
+                                t.end();
+                            });
+                    }
+                );
+
+
+            }
+        );
+
+
+        t.test("existsSync()",
+            function (t: tape.Test): void {
+
+                t.test("will return a truthy stats object when given an existing directory",
+                    function (t: tape.Test): void {
+                        const dir: Directory = new Directory(__dirname);
+                        const stats: fs.Stats|false = dir.existsSync();
+                        t.true(stats);
+                        t.true((<fs.Stats>stats).isDirectory());
+                        t.end();
+                    }
+                );
+
+
+                t.test("will return false when given a directory that does not exist",
+                    function (t: tape.Test): void {
+                        const dir: Directory = new Directory("foo/bar");
+                        const stats: fs.Stats|false = dir.existsSync();
+                        t.false(stats);
+                        t.end();
+                    }
+                );
+
+
+            }
+        );
+
+
+        t.test("ensureExists()",
+            function (t: tape.Test): void {
+
+                function setup(): void {
+                    const tmpDir: Directory = new Directory("tmp");
+                    tmpDir.emptySync();
+                }
+
+                t.test("will create a single directory that does not exist",
+                    function (t: tape.Test): void {
+                        setup();
+
+                        const dir: Directory = new Directory("tmp/sample");
+                        t.false(dir.existsSync());
+
+                        dir.ensureExists()
+                            .then(() => {
+                                t.true(dir.existsSync());
+                                t.end();
+                            });
+                    }
+                );
+
+
+                t.test("will create multiple directory levels that do not exist",
+                    function (t: tape.Test): void {
+                        setup();
+
+                        const dir: Directory = new Directory("tmp/dirA/dirB/dirC");
+                        t.false(dir.existsSync());
+
+                        dir.ensureExists()
+                            .then(() => {
+                                t.true(dir.existsSync());
+                                t.end();
+                            });
+                    }
+                );
+
+            }
+        );
+
+
+        t.test("ensureExistsSync()",
+            function (t: tape.Test): void {
+
+                function setup(): void {
+                    const tmpDir: Directory = new Directory("tmp");
+                    tmpDir.emptySync();
+                }
+
+
+                t.test("will create a single directory that does not exist",
+                    function (t: tape.Test): void {
+                        setup();
+
+                        const dir: Directory = new Directory("tmp/sample");
+                        t.false(dir.existsSync());
+
+                        dir.ensureExistsSync();
+                        t.true(dir.existsSync());
+
+                        t.end();
+                    }
+                );
+
+
+                t.test("will create multiple directory levels that do not exist",
+                    function (t: tape.Test): void {
+                        setup();
+
+                        const dir: Directory = new Directory("tmp/dirA/dirB/dirC");
+                        t.false(dir.existsSync());
+
+                        dir.ensureExistsSync();
+                        t.true(dir.existsSync());
+
+                        t.end();
+                    }
+                );
+
+            }
+        );
+
+
+        t.test("empty()",
+            function (t: tape.Test): void {
+
+
+                t.test("will delete existing items in the specified directory",
+                    function (t: tape.Test): void {
+
+                        const tmpDir: Directory = new Directory("tmp");
+                        const dirA:   Directory = new Directory("tmp/dirA");
+
+                        dirA.ensureExistsSync();
+
+                        tmpDir.empty()
+                            .then(() => {
+                                t.false(dirA.existsSync());
+                                t.true(tmpDir.existsSync());
+                                t.end();
+                            });
+                    }
+                );
+            }
+        );
+
+
+        t.test("emptySync()",
+            function (t: tape.Test): void {
+
+
+                t.test("will delete existing items in the specified directory",
+                    function (t: tape.Test): void {
+
+
+                        const tmpDir: Directory = new Directory("tmp");
+                        const dirA:   Directory = new Directory("tmp/dirA");
+                        dirA.ensureExistsSync();
+
+                        tmpDir.emptySync();
+                        t.false(dirA.existsSync());
+                        t.true(tmpDir.existsSync());
+                        t.end();
+                    }
+                );
 
             }
         );

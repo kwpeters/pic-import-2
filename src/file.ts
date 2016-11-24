@@ -74,7 +74,7 @@ export class File {
                     return;
                 }
 
-                // Either fs.stat failed or it is not a file.
+                // Either fs.stat() failed or it is not a file.
                 resolve(undefined);
             });
         });
