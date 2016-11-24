@@ -19,7 +19,7 @@
     "typescript": "^2.0.3"
   },
   "scripts": {
-    "test": "npm run build && ./node_modules/.bin/tape dist/**/*.spec.js",
+    "test": "npm run build && tape dist/**/*.spec.js",
     "build": "rm -rf ./dist && tsc"
   },
   "repository": {
