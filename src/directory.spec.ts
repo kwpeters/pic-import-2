@@ -187,7 +187,6 @@ tape(
         );
 
 
-        // Todo: left off here.
         t.test("exists()",
             function (t: tape.Test): void {
 
