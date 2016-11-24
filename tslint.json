@@ -19,8 +19,7 @@
     "class-name": true,
     "comment-format": [
       true,
-      "check-space",
-      "check-uppercase"
+      "check-space"
     ],
     "curly": true,
     "eofline": true,
@@ -76,6 +75,7 @@
     "no-use-before-declare": true,
     "no-var-keyword": true,
     "no-var-requires": true,
+    "object-literal-shorthand": false,
     "object-literal-sort-keys": false,
     "one-line": [
       true,
@@ -85,6 +85,8 @@
       "check-else",
       "check-whitespace"
     ],
+    "only-arrow-functions": false,
+    "ordered-imports": false,
     "quotemark": [
       true,
       "double",
