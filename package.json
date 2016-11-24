@@ -5,6 +5,7 @@
   "main": "index.js",
   "dependencies": {
     "bluebird": "^3.4.6",
+    "exif": "^0.6.0",
     "fs-extra": "^0.30.0",
     "lodash": "^4.14.36",
     "string": "^3.3.3"
