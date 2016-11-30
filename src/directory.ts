@@ -131,16 +131,16 @@ export class Directory {
     }
 
 
-    public existsSync(): fs.Stats|false {
+    public existsSync(): fs.Stats {
         let stats: fs.Stats;
 
         try {
             stats = fs.statSync(this._dirPath);
         } catch (ex) {
-            return false;
+            return undefined;
         }
 
-        return stats.isDirectory() ? stats : false;
+        return stats.isDirectory() ? stats : undefined;
     }
 
 

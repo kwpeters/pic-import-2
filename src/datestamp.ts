@@ -18,7 +18,7 @@ export class Datestamp {
      * @param {number} year - The year number
      * @param {number} month - The month number (1 - 12)
      * @param {number} day - The day of the month (1 - 31)
-     * @returns {Type} ReturnDescription
+     * @returns {Datestamp} ReturnDescription
      */
     public static fromYMD(year: number, month: number, day: number): Datestamp {
         return new Datestamp(new Date(

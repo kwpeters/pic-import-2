@@ -228,9 +228,9 @@ tape(
                 t.test("will return a truthy stats object when given an existing directory",
                     function (t: tape.Test): void {
                         const dir: Directory = new Directory(__dirname);
-                        const stats: fs.Stats|false = dir.existsSync();
+                        const stats: fs.Stats = dir.existsSync();
                         t.true(stats);
-                        t.true((<fs.Stats>stats).isDirectory());
+                        t.true(stats.isDirectory());
                         t.end();
                     }
                 );
@@ -239,7 +239,7 @@ tape(
                 t.test("will return false when given a directory that does not exist",
                     function (t: tape.Test): void {
                         const dir: Directory = new Directory("foo/bar");
-                        const stats: fs.Stats|false = dir.existsSync();
+                        const stats: fs.Stats = dir.existsSync();
                         t.false(stats);
                         t.end();
                     }
