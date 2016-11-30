@@ -1,7 +1,7 @@
 import * as tape from "tape";
 import {Directory} from "./directory";
 import {Datestamp} from "./datestamp";
-import {PhotoLibrary} from "./photoLibrary";
+import {PhotoLibrary, DateDirMap} from "./photoLibrary";
 
 const noop: () => void = () => {};
 
@@ -34,31 +34,65 @@ tape("PhotoLibrary", function (t: tape.Test): void {
             })();
 
 
-            t.test("will recognize a folder with a normal datestamp",
-                function (t: tape.Test): void {
+            t.test("will recognize a folder with a normal datestamp", function (t: tape.Test): void {
 
-                    setup();
+                setup();
 
-                    const dirA: Directory = new Directory(libDir, Datestamp.fromYMD(2016, 2, 20).toString());
-                    const dirB: Directory = new Directory(libDir, Datestamp.fromYMD(2016, 2, 21).toString());
+                const dirA: Directory = new Directory(libDir, Datestamp.fromYMD(2016, 2, 20).toString());
+                dirA.ensureExistsSync();
 
-                    dirA.ensureExistsSync();
-                    dirB.ensureExistsSync();
+                const dirB: Directory = new Directory(libDir, Datestamp.fromYMD(2016, 2, 21).toString());
+                dirB.ensureExistsSync();
 
-                    PhotoLibrary.createDateDirMap(libDir)
-                        .then((dateDirMap) => {
-                            t.equal(Object.keys(dateDirMap).length, 2);
-                            t.equal(dateDirMap["2016-02-20"].toString(), "tmp/lib/2016-02-20");
-                            t.equal(dateDirMap["2016-02-21"].toString(), "tmp/lib/2016-02-21");
-                            t.end();
-                        });
+                PhotoLibrary.createDateDirMap(libDir)
+                .then((dateDirMap: DateDirMap) => {
+                    t.equal(Object.keys(dateDirMap).length, 2);
+                    t.equal(dateDirMap["2016-02-20"].toString(), "tmp/lib/2016-02-20");
+                    t.equal(dateDirMap["2016-02-21"].toString(), "tmp/lib/2016-02-21");
+                    t.end();
+                });
 
-                }
-            );
+            });
+
+
+            t.test("will recognize a folder with additional text appended", function (t: tape.Test): void {
+
+                setup();
+
+                const dirA: Directory = new Directory(libDir, Datestamp.fromYMD(2016, 2, 20).toString() + " - event A");
+                dirA.ensureExistsSync();
+                const dirB: Directory = new Directory(libDir, Datestamp.fromYMD(2016, 2, 21).toString() + "_event_B");
+                dirB.ensureExistsSync();
+
+                PhotoLibrary.createDateDirMap(libDir)
+                .then((dateDirMap: DateDirMap) => {
+                    t.equal(Object.keys(dateDirMap).length, 2);
+                    t.equal(dateDirMap["2016-02-20"].toString(), "tmp/lib/2016-02-20 - event A");
+                    t.equal(dateDirMap["2016-02-21"].toString(), "tmp/lib/2016-02-21_event_B");
+                    t.end();
+                });
+
+            });
 
         });
 
 
     });
+
+
+    t.test("instance", function (t: tape.Test): void {
+
+
+        t.test("can be created", function (t: tape.Test): void {
+
+            // todo: Left off here!
+            t.ok(false);
+            t.end();
+
+        });
+
+
+    });
+
 
 });
