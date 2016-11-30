@@ -143,17 +143,17 @@ tape(
                     function (t: tape.Test): void {
                         const dir: Directory = new Directory(path.join(__dirname, ".."));
                         dir.getSubdirectories()
-                            .then((subdirs: Directory[]) => {
-                                t.equal(subdirs.length, 7);
-                                t.equal(subdirs[0].toString().slice(-4), ".git");
-                                t.equal(subdirs[1].toString().slice(-5), ".idea");
-                                t.equal(subdirs[2].toString().slice(-4), "dist");
-                                t.equal(subdirs[3].toString().slice(-12), "node_modules");
-                                t.equal(subdirs[4].toString().slice(-3), "src");
-                                t.equal(subdirs[5].toString().slice(-4), "test");
-                                t.equal(subdirs[6].toString().slice(-3), "tmp");
-                                t.end();
-                            });
+                        .then((subdirs: Directory[]) => {
+                            t.equal(subdirs.length, 7);
+                            t.equal(subdirs[0].toString().slice(-4), ".git");
+                            t.equal(subdirs[1].toString().slice(-5), ".idea");
+                            t.equal(subdirs[2].toString().slice(-4), "dist");
+                            t.equal(subdirs[3].toString().slice(-12), "node_modules");
+                            t.equal(subdirs[4].toString().slice(-3), "src");
+                            t.equal(subdirs[5].toString().slice(-4), "test");
+                            t.equal(subdirs[6].toString().slice(-3), "tmp");
+                            t.end();
+                        });
                     }
                 );
 
@@ -196,11 +196,11 @@ tape(
                         const dir: Directory = new Directory(__dirname);
 
                         dir.exists()
-                            .then((stats) => {
-                                t.true(stats);
-                                t.true(stats.isDirectory());
-                                t.end();
-                            });
+                        .then((stats) => {
+                            t.true(stats);
+                            t.true(stats.isDirectory());
+                            t.end();
+                        });
                     }
                 );
 
@@ -210,10 +210,10 @@ tape(
 
                         const dir: Directory = new Directory("foo/bar");
                         dir.exists()
-                            .then((stats) => {
-                                t.false(stats);
-                                t.end();
-                            });
+                        .then((stats) => {
+                            t.false(stats);
+                            t.end();
+                        });
                     }
                 );
 
@@ -266,10 +266,10 @@ tape(
                         t.false(dir.existsSync());
 
                         dir.ensureExists()
-                            .then(() => {
-                                t.true(dir.existsSync());
-                                t.end();
-                            });
+                        .then(() => {
+                            t.true(dir.existsSync());
+                            t.end();
+                        });
                     }
                 );
 
@@ -282,10 +282,10 @@ tape(
                         t.false(dir.existsSync());
 
                         dir.ensureExists()
-                            .then(() => {
-                                t.true(dir.existsSync());
-                                t.end();
-                            });
+                        .then(() => {
+                            t.true(dir.existsSync());
+                            t.end();
+                        });
                     }
                 );
 
@@ -348,11 +348,11 @@ tape(
                         dirA.ensureExistsSync();
 
                         tmpDir.empty()
-                            .then(() => {
-                                t.false(dirA.existsSync());
-                                t.true(tmpDir.existsSync());
-                                t.end();
-                            });
+                        .then(() => {
+                            t.false(dirA.existsSync());
+                            t.true(tmpDir.existsSync());
+                            t.end();
+                        });
                     }
                 );
             }

@@ -29,19 +29,20 @@ export class PhotoLibrary {
     public static createDateDirMap(libraryDir: Directory): Promise<DateDirMap> {
 
         return libraryDir.getSubdirectories()
-            .then((subdirs: Directory[]) => {
-                // We are only concerned with the subdirectories that have a date in them.
-                return _.reduce(
-                    subdirs,
-                    (acc: DateDirMap, curSubdir: Directory) => {
-                        const datestamp: Datestamp = DatestampDir.test(curSubdir.toString());
-                        if (datestamp) {
-                            acc[datestamp.toString()] = curSubdir;
-                        }
-                        return acc;
-                    },
-                    {});
-            });
+        .then((subdirs: Directory[]) => {
+            // We are only concerned with the subdirectories that have a date in them.
+            return _.reduce(
+                subdirs,
+                (acc: DateDirMap, curSubdir: Directory) => {
+                    const datestamp: Datestamp = DatestampDir.test(curSubdir.toString());
+                    if (datestamp) {
+                        acc[datestamp.toString()] = curSubdir;
+                    }
+                    return acc;
+                },
+                {}
+            );
+        });
 
     }
 

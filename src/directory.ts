@@ -47,37 +47,37 @@ export class Directory {
 
 
         return readdir(this._dirPath)
-            .then((dirEntries: string[]) => {
-                // Convert to full paths.
-                dirEntries = _.map(
-                    dirEntries,
-                    (curDirEntry) => { return path.join(this._dirPath, curDirEntry); }
-                );
+        .then((dirEntries: string[]) => {
+            // Convert to full paths.
+            dirEntries = _.map(
+                dirEntries,
+                (curDirEntry) => { return path.join(this._dirPath, curDirEntry); }
+            );
 
-                // Map each directory entry into a Promise for an object containing the
-                // directory entry's name and its stats.
-                const promises: Promise<{dirEntry: string, stats: Stats}>[] = _.map(
-                    dirEntries,
-                    (curDirEntry) => {
-                        return stat(curDirEntry)
-                            .then((stats: Stats) => {
-                                return {dirEntry: curDirEntry, stats: stats};
-                            });
-                    }
-                );
-                return Promise.all(promises);
-            })
-            .then((dirEntryInfos: {dirEntry: string, stats: Stats}[]) => {
-                // Keep only the directory entries that are directories.
-                dirEntryInfos = _.filter(dirEntryInfos, (curDirEntryInfo) => {
-                    return curDirEntryInfo.stats.isDirectory();
-                });
-
-                // Return a Directory instance wrappping each subdirectory.
-                return _.map(dirEntryInfos, (curDirInfo) => {
-                    return new Directory(curDirInfo.dirEntry);
-                });
+            // Map each directory entry into a Promise for an object containing the
+            // directory entry's name and its stats.
+            const promises: Promise<{dirEntry: string, stats: Stats}>[] = _.map(
+                dirEntries,
+                (curDirEntry) => {
+                    return stat(curDirEntry)
+                    .then((stats: Stats) => {
+                        return {dirEntry: curDirEntry, stats: stats};
+                    });
+                }
+            );
+            return Promise.all(promises);
+        })
+        .then((dirEntryInfos: {dirEntry: string, stats: Stats}[]) => {
+            // Keep only the directory entries that are directories.
+            dirEntryInfos = _.filter(dirEntryInfos, (curDirEntryInfo) => {
+                return curDirEntryInfo.stats.isDirectory();
             });
+
+            // Return a Directory instance wrappping each subdirectory.
+            return _.map(dirEntryInfos, (curDirInfo) => {
+                return new Directory(curDirInfo.dirEntry);
+            });
+        });
     }
 
 

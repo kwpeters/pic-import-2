@@ -207,10 +207,10 @@ tape(
                     function (t: tape.Test): void {
                         const file: File = new File(__filename);
                         file.exists()
-                            .then((stats) => {
-                                t.assert(stats);
-                                t.end();
-                            });
+                        .then((stats) => {
+                            t.assert(stats);
+                            t.end();
+                        });
                     }
                 );
 
@@ -219,10 +219,10 @@ tape(
                     function (t: tape.Test): void {
                         const file: File = new File("./foo/bar.txt");
                         file.exists()
-                            .then((stats) => {
-                                t.equal(stats, undefined);
-                                t.end();
-                            });
+                        .then((stats) => {
+                            t.equal(stats, undefined);
+                            t.end();
+                        });
                     }
                 );
 
@@ -273,11 +273,11 @@ tape(
 
                         const srcFile: File = new File("test/input/2015-03-11 09.05.32.jpg");
                         srcFile.copy(destDir)
-                            .then((destFile: File) => {
-                                t.equal(destFile.toString(), "tmp/2015-03-11 09.05.32.jpg");
-                                t.assert(destFile.existsSync());
-                                t.end();
-                            });
+                        .then((destFile: File) => {
+                            t.equal(destFile.toString(), "tmp/2015-03-11 09.05.32.jpg");
+                            t.assert(destFile.existsSync());
+                            t.end();
+                        });
                     }
                 );
 
@@ -288,11 +288,11 @@ tape(
 
                         const srcFile: File = new File("test/input/2015-03-11 09.05.32.jpg");
                         srcFile.copy(destDir, "foo.jpg")
-                            .then((destFile: File) => {
-                                t.equal(destFile.toString(), "tmp/foo.jpg");
-                                t.assert(destFile.existsSync());
-                                t.end();
-                            });
+                        .then((destFile: File) => {
+                            t.equal(destFile.toString(), "tmp/foo.jpg");
+                            t.assert(destFile.existsSync());
+                            t.end();
+                        });
                     }
                 );
 
@@ -304,11 +304,11 @@ tape(
                         const srcFile: File = new File("test/input/2015-03-11 09.05.32.jpg");
                         const destFile: File = new File("tmp/foo2.jpg");
                         srcFile.copy(destFile)
-                            .then((destFile: File) => {
-                                t.equal(destFile.toString(), "tmp/foo2.jpg");
-                                t.assert(destFile.existsSync());
-                                t.end();
-                            });
+                        .then((destFile: File) => {
+                            t.equal(destFile.toString(), "tmp/foo2.jpg");
+                            t.assert(destFile.existsSync());
+                            t.end();
+                        });
                     }
                 );
 
@@ -345,13 +345,11 @@ tape(
                         // Copy newFile over origFile.  Get the size of the copied file.
                         // It should equal the size of newFile.
                         newFile.copy(origFile)
-                            .then(
-                                (destFile: File) => {
-                                    t.equal(destFile.statsSync().size, newSize);
-                                    t.notEqual(destFile.statsSync().size, origSize);
-                                    t.end();
-                                }
-                            );
+                        .then((destFile: File) => {
+                            t.equal(destFile.statsSync().size, newSize);
+                            t.notEqual(destFile.statsSync().size, origSize);
+                            t.end();
+                        });
                     }
                 );
 
@@ -469,12 +467,12 @@ tape(
                     function (t: tape.Test): void {
                         setup();
                         srcFile.move(destDir)
-                            .then((destFile: File) => {
-                                t.equal(destFile.toString(), "tmp/dest/2015-03-11 09.05.32.jpg");
-                                t.assert(destFile.existsSync());
-                                t.false(srcFile.existsSync());
-                                t.end();
-                            });
+                        .then((destFile: File) => {
+                            t.equal(destFile.toString(), "tmp/dest/2015-03-11 09.05.32.jpg");
+                            t.assert(destFile.existsSync());
+                            t.false(srcFile.existsSync());
+                            t.end();
+                        });
                     }
                 );
 
@@ -483,12 +481,12 @@ tape(
                     function (t: tape.Test): void {
                         setup();
                         srcFile.move(destDir, "foo.jpg")
-                            .then((destFile: File) => {
-                                t.equal(destFile.toString(), "tmp/dest/foo.jpg");
-                                t.assert(destFile.existsSync());
-                                t.false(srcFile.existsSync());
-                                t.end();
-                            });
+                        .then((destFile: File) => {
+                            t.equal(destFile.toString(), "tmp/dest/foo.jpg");
+                            t.assert(destFile.existsSync());
+                            t.false(srcFile.existsSync());
+                            t.end();
+                        });
                     }
                 );
 
@@ -498,12 +496,12 @@ tape(
                         setup();
                         const destFile: File = new File(destDir, "foo2.jpg");
                         srcFile.move(destFile)
-                            .then((destFile: File) => {
-                                t.equal(destFile.toString(), "tmp/dest/foo2.jpg");
-                                t.assert(destFile.existsSync());
-                                t.false(srcFile.existsSync());
-                                t.end();
-                            });
+                        .then((destFile: File) => {
+                            t.equal(destFile.toString(), "tmp/dest/foo2.jpg");
+                            t.assert(destFile.existsSync());
+                            t.false(srcFile.existsSync());
+                            t.end();
+                        });
                     }
                 );
 
@@ -540,11 +538,11 @@ tape(
                         // Move newFile over origFile.  Get the size of the resulting file.
                         // It should equal the size of newFile.
                         newFile.move(origFile)
-                            .then((destFile: File) => {
-                                t.equal(destFile.statsSync().size, newSize);
-                                t.false(newFile.existsSync());
-                                t.end();
-                            });
+                        .then((destFile: File) => {
+                            t.equal(destFile.statsSync().size, newSize);
+                            t.false(newFile.existsSync());
+                            t.end();
+                        });
                     }
                 );
 
@@ -657,10 +655,10 @@ tape(
                         const outFile: File = new File(dir, "test.txt");
 
                         outFile.write("hello world")
-                            .then(() => {
-                                t.assert(outFile.existsSync());
-                                t.end();
-                            });
+                        .then(() => {
+                            t.assert(outFile.existsSync());
+                            t.end();
+                        });
 
                     }
                 );
@@ -672,13 +670,13 @@ tape(
                         const outFile: File = new File(dir, "test.txt");
 
                         outFile.write("12345")
-                            .then(() => {
-                                return outFile.read();
-                            })
-                            .then((text) => {
-                                t.equal(text, "12345");
-                                t.end();
-                            });
+                        .then(() => {
+                            return outFile.read();
+                        })
+                        .then((text) => {
+                            t.equal(text, "12345");
+                            t.end();
+                        });
 
                     }
                 );
@@ -738,10 +736,10 @@ tape(
                         file.writeSync("xyzzy");
 
                         file.read()
-                            .then((text: string) => {
-                                t.equal(text, "xyzzy");
-                                t.end();
-                            });
+                        .then((text: string) => {
+                            t.equal(text, "xyzzy");
+                            t.end();
+                        });
                     }
                 );
 
@@ -750,13 +748,13 @@ tape(
                         setup();
                         const file: File = new File(tmpDir, "does_not_exist.txt");
                         file.read()
-                            .then(() => {
-                                t.fail("The file should not have been read successfully.");
-                            })
-                            .catch(() => {
-                                t.pass("Reading a non-existent file rejected appropriately.");
-                                t.end();
-                            });
+                        .then(() => {
+                            t.fail("The file should not have been read successfully.");
+                        })
+                        .catch(() => {
+                            t.pass("Reading a non-existent file rejected appropriately.");
+                            t.end();
+                        });
 
                     }
                 );
