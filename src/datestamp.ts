@@ -1,5 +1,9 @@
 import * as S from "string";
 
+
+const dateRegex: RegExp = /(\d{4})[._-](\d{2})[-_.](\d{2})/;
+
+
 /**
  * @class
  * @classdesc Represents a date
@@ -25,6 +29,27 @@ export class Datestamp {
             year,
             month - 1, // convert from 1-based to 0-based
             day));
+    }
+
+
+    /**
+     * Creates a Datestamp from a string that contains an appropriate pattern.
+     * @static
+     * @param str - A string containing a datestamp pattern
+     * @returns {Datestamp|null} The datestamp found.  null if a datestamp was
+     * not found.
+     */
+    public static fromString(str: string): Datestamp|null {
+        const matches: RegExpExecArray|null = dateRegex.exec(str);
+        if (matches) {
+            const year: number  = parseInt(matches[1], 10);
+            const month: number = parseInt(matches[2], 10) - 1; // Make it 0-based
+            const day: number   = parseInt(matches[3], 10);
+
+            return Datestamp.fromYMD(year, month, day);
+        }
+
+        return null;
     }
 
 

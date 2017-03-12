@@ -215,12 +215,12 @@ tape(
                 );
 
 
-                t.test("will resolve with undefined when the file does not exist",
+                t.test("will resolve with null when the file does not exist",
                     function (t: tape.Test): void {
                         const file: File = new File("./foo/bar.txt");
                         file.exists()
                         .then((stats) => {
-                            t.equal(stats, undefined);
+                            t.equal(stats, null);
                             t.end();
                         });
                     }
@@ -238,17 +238,17 @@ tape(
                 t.test("will return the file's stats when the file exists",
                     function (t: tape.Test): void {
                         const file: File = new File(__filename);
-                        const stats: fs.Stats = file.existsSync();
+                        const stats: fs.Stats|null = file.existsSync();
                         t.assert(stats);
                         t.end();
                     }
                 );
 
-                t.test("will return undefined when the file does not exist",
+                t.test("will return null when the file does not exist",
                     function (t: tape.Test): void {
                         const file: File = new File("./foo/bar.txt");
-                        const stats: fs.Stats = file.existsSync();
-                        t.equal(stats, undefined);
+                        const stats: fs.Stats|null = file.existsSync();
+                        t.equal(stats, null);
                         t.end();
                     }
                 );
@@ -335,19 +335,37 @@ tape(
                         // Create a small text file and get its size.
                         const origFile: File = new File(destDir, "test.txt");
                         origFile.writeSync("abc");
-                        const origSize: number = origFile.statsSync().size;
+                        const origStats: fs.Stats|null = origFile.statsSync();
+                        if (!origStats) {
+                            t.fail("Failed to get stats");
+                            return;
+                        }
+                        const origSize: number = origStats.size;
+
 
                         // Create another file and get its size.
                         const newFile: File = new File(destDir, "source.txt");
                         newFile.writeSync("abcdefghijklmnopqrstuvwxyz");
-                        const newSize: number = newFile.statsSync().size;
+                        const newStats: fs.Stats|null = newFile.statsSync();
+                        if (!newStats) {
+                            t.fail("Failed to get stats");
+                            return;
+                        }
+                        const newSize: number = newStats.size;
 
                         // Copy newFile over origFile.  Get the size of the copied file.
                         // It should equal the size of newFile.
                         newFile.copy(origFile)
                         .then((destFile: File) => {
-                            t.equal(destFile.statsSync().size, newSize);
-                            t.notEqual(destFile.statsSync().size, origSize);
+
+                            const finalStats: fs.Stats|null = destFile.statsSync();
+                            if (!finalStats) {
+                                t.fail("Failed to get Stats on final file.");
+                                return;
+                            }
+
+                            t.equal(finalStats.size, newSize);
+                            t.notEqual(finalStats.size, origSize);
                             t.end();
                         });
                     }
@@ -427,18 +445,33 @@ tape(
                         // Create a small text file and get its size.
                         const origFile: File = new File(destDir, "test.txt");
                         origFile.writeSync("abc");
-                        const origSize: number = origFile.statsSync().size;
+                        const origStats: fs.Stats|null = origFile.statsSync();
+                        if (!origStats) {
+                            t.fail("Failed to get file stats.");
+                            return;
+                        }
+                        const origSize: number = origStats.size;
 
                         // Create another file and get its size.
                         const newFile: File = new File(destDir, "source.txt");
                         newFile.writeSync("abcdefghijklmnopqrstuvwxyz");
-                        const newSize: number = newFile.statsSync().size;
+                        const newStats: fs.Stats|null = newFile.statsSync();
+                        if (!newStats) {
+                            t.fail("Failed to get file stats.");
+                            return;
+                        }
+                        const newSize: number = newStats.size;
 
                         // Copy newFile over origFile.  Get the size of the copied file.
                         // It should equal the size of newFile.
                         newFile.copySync(origFile);
-                        t.equal(origFile.statsSync().size, newSize);
-                        t.notEqual(origFile.statsSync().size, origSize);
+                        const finalStats: fs.Stats|null = origFile.statsSync();
+                        if (!finalStats) {
+                            t.fail("Failed to get final file stats.");
+                            return;
+                        }
+                        t.equal(finalStats.size, newSize);
+                        t.notEqual(finalStats.size, origSize);
                         t.end();
                     }
                 );
@@ -533,13 +566,23 @@ tape(
                         // Create another file and get its size.
                         const newFile: File = new File(destDir, "source.txt");
                         newFile.writeSync("abcdefghijklmnopqrstuvwxyz");
-                        const newSize: number = newFile.statsSync().size;
+                        const newStats: fs.Stats|null = newFile.statsSync();
+                        if (!newStats) {
+                            t.fail("Failed to get stats on file.");
+                            return;
+                        }
+                        const newSize: number = newStats.size;
 
                         // Move newFile over origFile.  Get the size of the resulting file.
                         // It should equal the size of newFile.
                         newFile.move(origFile)
                         .then((destFile: File) => {
-                            t.equal(destFile.statsSync().size, newSize);
+                            const destStats: fs.Stats|null = destFile.statsSync();
+                            if (!destStats) {
+                                t.fail("Failed to get stats on destFile.");
+                                return;
+                            }
+                            t.equal(destStats.size, newSize);
                             t.false(newFile.existsSync());
                             t.end();
                         });
@@ -631,12 +674,22 @@ tape(
                         // Create another file and get its size.
                         const newFile: File = new File(destDir, "source.txt");
                         newFile.writeSync("abcdefghijklmnopqrstuvwxyz");
-                        const newSize: number = newFile.statsSync().size;
+                        const newStats: fs.Stats|null = newFile.statsSync();
+                        if (!newStats) {
+                            t.fail("Failed to get stats on file.");
+                            return;
+                        }
+                        const newSize: number = newStats.size;
 
                         // Move newFile over origFile.  Get the size of the resulting file.
                         // It should equal the size of newFile.
                         const destFile: File = newFile.moveSync(origFile);
-                        t.equal(destFile.statsSync().size, newSize);
+                        const destStats: fs.Stats|null = destFile.statsSync();
+                        if (!destStats) {
+                            t.fail("Failed to get stats on destFile.");
+                            return;
+                        }
+                        t.equal(destStats.size, newSize);
                         t.false(newFile.existsSync());
                         t.end();
                     }

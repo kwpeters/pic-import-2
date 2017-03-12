@@ -60,12 +60,12 @@ export class File {
 
     /**
      * Checks to see if this file exists.
-     * @returns {Promise<fs.Stats>} A Promise that is fulfilled with the file's stats if it exists.
-     * It is resolved with undefined otherwise.
+     * @returns {Promise<fs.Stats|null>} A Promise that is fulfilled with the file's stats if it exists.
+     * It is resolved with null otherwise.
      */
-    public exists(): Promise<fs.Stats> {
+    public exists(): Promise<fs.Stats|null> {
 
-        return new Promise<fs.Stats>((resolve: (result: fs.Stats) => void, reject: (err: any) => void) => {
+        return new Promise<fs.Stats|null>((resolve: (result: fs.Stats|null) => void, reject: (err: any) => void) => {
 
             fs.stat(this._filePath, (err: NodeJS.ErrnoException, stats: fs.Stats) => {
 
@@ -75,7 +75,7 @@ export class File {
                 }
 
                 // Either fs.stat() failed or it is not a file.
-                resolve(undefined);
+                resolve(null);
             });
         });
     }
@@ -83,32 +83,45 @@ export class File {
 
     /**
      * Checks to see if this file exists.
-     * @returns {fs.Stats}  If the file exists, its fs.Stats object is returned.
-     *  If the file does not exist, undefined is returned.
+     * @returns {fs.Stats|null}  If the file exists, its fs.Stats object is returned.
+     *  If the file does not exist, null is returned.
      */
-    public existsSync(): fs.Stats {
+    public existsSync(): fs.Stats|null {
         let stats: fs.Stats;
 
         try {
             stats = fs.statSync(this._filePath);
         } catch (ex) {
-            return undefined;
+            return null;
         }
 
-        return stats.isFile() ? stats : undefined;
+        return stats.isFile() ? stats : null;
     }
 
 
-    public stats(): Promise<fs.Stats> {
+    public stats(): Promise<fs.Stats|null> {
         return this.exists();
     }
 
 
-    public statsSync(): fs.Stats {
+    public statsSync(): fs.Stats|null {
         return this.existsSync();
     }
 
 
+    /**
+     * Copies this file to the specified destination.
+     * @method
+     * @param {Directory|File} destDirOrFile - If a File, specifies the
+     * destination directory and file name.  If a directory, specifies only the
+     * destination directory and destFileName specifies the destination file
+     * name.
+     * @param {string} destFileName - When destDirOrFile is a Directory,
+     * optionally specifies the desitnation file name.  If omitted, the
+     * destination file name will be the same as the source (this).
+     * @return {Promise<File>} A promise for a File representing the destination
+     * file.
+     */
     public copy(destDirOrFile: Directory | File, destFileName?: string): Promise<File> {
         return new Promise<File>((resolve: (result: File) => void, reject: (err: any) => void) => {
             let destFile: File;
@@ -117,7 +130,7 @@ export class File {
                 // The caller has specified the destination directory and file
                 // name in the form of a File.
                 destFile = destDirOrFile;
-            } else if (destDirOrFile instanceof Directory) {
+            } else {           // destDirOrFile instanceof Directory
                 // The caller has specified the destination directory and
                 // optionally a new file name.
                 if (destFileName === undefined) {
@@ -127,7 +140,7 @@ export class File {
                 }
             }
 
-            fs.copy(this._filePath, destFile.toString(), (err) => {
+            fs.copy(this._filePath, destFile.toString(), {preserveTimestamps: true}, (err) => {
                 if (err) {
                     reject(err);
                     return;
@@ -139,6 +152,18 @@ export class File {
     }
 
 
+    /**
+     * Copies this file to the specified destination.
+     * @method
+     * @param {Directory|File} destDirOrFile - If a File, specifies the
+     * destination directory and file name.  If a directory, specifies only the
+     * destination directory and destFileName specifies the destination file
+     * name.
+     * @param {string} destFileName - When destDirOrFile is a Directory,
+     * optionally specifies the desitnation file name.  If omitted, the
+     * destination file name will be the same as the source (this).
+     * @return {File} A File representing the destination file.
+     */
     public copySync(destDirOrFile: Directory | File, destFileName?: string): File {
 
         let destFile: File;
@@ -147,7 +172,7 @@ export class File {
             // The caller has specified the destination directory and file name
             // in the form of a File.
             destFile = destDirOrFile;
-        } else if (destDirOrFile instanceof Directory) {
+        } else {          // destDirOrFile instanceof Directory
             // The caller has specified the destination directory and optionally
             // a new file name.
             if (destFileName === undefined) {
@@ -157,7 +182,7 @@ export class File {
             }
         }
 
-        fs.copySync(this._filePath, destFile.toString());
+        fs.copySync(this._filePath, destFile.toString(), {preserveTimestamps: true});
         return destFile;
     }
 
@@ -166,7 +191,7 @@ export class File {
      * Moves this file to the specified destination.
      * @method
      * @param {Directory|File} destDirOrFile - The destination directory or file name
-     * @param {string} [destFilename] - If destDirOrFile is a Directory, this optional
+     * @param {string} [destFileName] - If destDirOrFile is a Directory, this optional
      * parameter can specify the name of the destination file.  If not specified, the
      * file name of this file is used.
      * @returns {Promise} A promise that is resolved with the destination File object
@@ -180,7 +205,7 @@ export class File {
                 // The caller has specified the destination directory and file
                 // name in the form of a File.
                 destFile = destDirOrFile;
-            } else if (destDirOrFile instanceof Directory) {
+            } else {              // destDirOrFile instanceof Directory
                 // The caller has specified the destination directory and
                 // optionally a new file name.
                 if (destFileName === undefined) {
@@ -206,20 +231,19 @@ export class File {
      * Moves this file to the specified destination.
      * @method
      * @param {Directory|File} destDirOrFile - The destination directory or file name
-     * @param {string} [destFilename] - If destDirOrFile is a Directory, this optional
+     * @param {string} [destFileName] - If destDirOrFile is a Directory, this optional
      * parameter can specify the name of the destination file.  If not specified, the
      * file name of this file is used.
      * @returns {File} A File object representing the destination file
      */
     public moveSync(destDirOrFile: Directory | File, destFileName?: string): File {
-        //var srcFileParts = this.split(),
         let destFile: File;
 
         if (destDirOrFile instanceof File) {
             // The caller has specified the destination directory and file name in the
             // form of a File.
             destFile = destDirOrFile;
-        } else if (destDirOrFile instanceof Directory) {
+        } else {         // destDirOrFile instanceof Directory
             // The caller has specified the destination directory and optionally a new
             // file name.
 

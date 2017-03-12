@@ -1,7 +1,9 @@
 import * as path from "path";
 import * as tape from "tape";
 import * as fs from "fs-extra";
+import * as _ from "lodash";
 import {Directory} from "./directory";
+import {File} from "./file";
 
 
 tape(
@@ -187,6 +189,83 @@ tape(
         );
 
 
+        t.test("getFiles()",
+            function (t: tape.Test): void {
+
+                let tmpDir: Directory;
+
+                function setup(): void {
+                    tmpDir = new Directory("tmp");
+                    tmpDir.ensureExistsSync();
+                    tmpDir.emptySync();
+
+                    _.forEach([
+                            "test/input/2015-03-11 09.05.32.jpg",
+                            "test/input/IMG_8718-canon.JPG",
+                            "test/input/P1040165-panasonic.JPG"],
+                        (curFileName) => {
+                            const file: File = new File(curFileName);
+                            file.copySync(tmpDir);
+                        }
+                    );
+                }
+
+                t.test("will return the Directory's files",
+                    function (t: tape.Test): void {
+                        setup();
+                        tmpDir.getFiles()
+                        .then((files: File[]) => {
+                            t.equal(files.length, 3);
+                            t.equal(files[0].toString(), "tmp/2015-03-11 09.05.32.jpg");
+                            t.equal(files[1].toString(), "tmp/IMG_8718-canon.JPG");
+                            t.equal(files[2].toString(), "tmp/P1040165-panasonic.JPG");
+                            t.end();
+                        });
+                    }
+                );
+
+            }
+        );
+
+
+        t.test("getFilesSync()",
+            function (t: tape.Test): void {
+
+                let tmpDir: Directory;
+
+                function setup(): void {
+                    tmpDir = new Directory("tmp");
+                    tmpDir.ensureExistsSync();
+                    tmpDir.emptySync();
+
+                    _.forEach([
+                            "test/input/2015-03-11 09.05.32.jpg",
+                            "test/input/IMG_8718-canon.JPG",
+                            "test/input/P1040165-panasonic.JPG"],
+                        (curFileName) => {
+                            const file: File = new File(curFileName);
+                            file.copySync(tmpDir);
+                        }
+                    );
+                }
+
+                t.test("will return the Directory's files",
+                    function (t: tape.Test): void {
+                        setup();
+                        const files: File[] = tmpDir.getFilesSync();
+
+                        t.equal(files.length, 3);
+                        t.equal(files[0].toString(), "tmp/2015-03-11 09.05.32.jpg");
+                        t.equal(files[1].toString(), "tmp/IMG_8718-canon.JPG");
+                        t.equal(files[2].toString(), "tmp/P1040165-panasonic.JPG");
+                        t.end();
+                    }
+                );
+
+            }
+        );
+
+
         t.test("exists()",
             function (t: tape.Test): void {
 
@@ -196,10 +275,13 @@ tape(
                         const dir: Directory = new Directory(__dirname);
 
                         dir.exists()
-                        .then((stats) => {
-                            t.true(stats);
-                            t.true(stats.isDirectory());
-                            t.end();
+                        .then((stats: fs.Stats|null) => {
+                            if (stats) {
+                                t.true(stats.isDirectory());
+                                t.end();
+                            } else {
+                                t.fail("Expected a Stats object");
+                            }
                         });
                     }
                 );
@@ -228,10 +310,13 @@ tape(
                 t.test("will return a truthy stats object when given an existing directory",
                     function (t: tape.Test): void {
                         const dir: Directory = new Directory(__dirname);
-                        const stats: fs.Stats = dir.existsSync();
-                        t.true(stats);
-                        t.true(stats.isDirectory());
-                        t.end();
+                        const stats: fs.Stats|null = dir.existsSync();
+                        if (stats) {
+                            t.true(stats.isDirectory());
+                            t.end();
+                        } else {
+                            t.fail("Expected a Stats object");
+                        }
                     }
                 );
 
@@ -239,7 +324,7 @@ tape(
                 t.test("will return false when given a directory that does not exist",
                     function (t: tape.Test): void {
                         const dir: Directory = new Directory("foo/bar");
-                        const stats: fs.Stats = dir.existsSync();
+                        const stats: fs.Stats|null = dir.existsSync();
                         t.false(stats);
                         t.end();
                     }

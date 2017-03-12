@@ -6,7 +6,7 @@
   "dependencies": {
     "bluebird": "^3.4.6",
     "exif": "^0.6.0",
-    "fs-extra": "^0.30.0",
+    "fs-extra": "^2.0.0",
     "lodash": "^4.14.36",
     "string": "^3.3.3"
   },
@@ -19,7 +19,7 @@
     "@types/tape": "^4.2.28",
     "tap-dot": "^1.0.5",
     "tape": "^4.6.2",
-    "typescript": "^2.0.3"
+    "typescript": "^2.1.4"
   },
   "scripts": {
     "test": "npm run build && tape dist/**/*.spec.js",

@@ -1,3 +1,4 @@
+import * as Promise from "bluebird";
 import {Datestamp} from "./datestamp";
 
 // No .d.ts file available for exif package.

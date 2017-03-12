@@ -12,7 +12,7 @@ export class DatestampDir {
      * the pattern of a timestamped directory.
      * @static
      * @param {string} path - The path to test
-     * @returns {Datestamp | null} The corresponding Datestamp if the path is a
+     * @returns {Datestamp|null} The corresponding Datestamp if the path is a
      * timestamped directory.  null otherwise.
      */
     public static test(path: string): Datestamp | null {
