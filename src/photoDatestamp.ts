@@ -66,8 +66,12 @@ export function getDatestampStats(file: File): Promise<Datestamp> {
                 consideredTimeValues.push(stats.birthtime.valueOf());
             }
 
-            const oldestTime: number = _.min(consideredTimeValues);
-            resolve(new Datestamp(new Date(oldestTime)));
+            const minResult: number | undefined = _.min(consideredTimeValues);
+            if (typeof minResult === "number") {
+                resolve(new Datestamp(new Date(minResult)));
+            } else {
+                reject(new Error("Oldest time could not be gotten from file stats."));
+            }
         });
     });
 }
