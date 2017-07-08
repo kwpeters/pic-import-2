@@ -33,12 +33,12 @@ export class Directory {
 
     public get absPath(): string {
         return path.resolve(this._dirPath);
-    };
+    }
 
 
     public equals(other: Directory): boolean {
         return this.absPath === other.absPath;
-    };
+    }
 
 
     public split(): string[] {
@@ -53,12 +53,12 @@ export class Directory {
             // Convert to full paths.
             dirEntries = _.map(
                 dirEntries,
-                (curDirEntry) => { return path.join(this._dirPath, curDirEntry); }
+                (curDirEntry) => path.join(this._dirPath, curDirEntry)
             );
 
             // Map each directory entry into a Promise for an object containing the
             // directory entry's name and its stats.
-            const promises: Promise<{dirEntry: string, stats: Stats}>[] = _.map(
+            const promises:  Array<Promise<{dirEntry: string, stats: Stats}>> = _.map(
                 dirEntries,
                 (curDirEntry) => {
                     return statAsync(curDirEntry)
@@ -69,7 +69,7 @@ export class Directory {
             );
             return Promise.all(promises);
         })
-        .then((dirEntryInfos: {dirEntry: string, stats: Stats}[]) => {
+        .then((dirEntryInfos: Array<{dirEntry: string, stats: Stats}>) => {
             // Keep only the directory entries that are directories.
             dirEntryInfos = _.filter(dirEntryInfos, (curDirEntryInfo) => {
                 return curDirEntryInfo.stats.isDirectory();
@@ -92,7 +92,7 @@ export class Directory {
 
         // Map each directory entry to an object containing the directory
         // entry's name and its stats.
-        let dirEntryInfos: {dirEntry: string, stats: Stats}[] = _.map(
+        let dirEntryInfos: Array<{dirEntry: string, stats: Stats}> = _.map(
             dirEntries,
             (curDirEntry: string): {dirEntry: string, stats: Stats} => {
                 const stats: Stats = fs.statSync(curDirEntry);
@@ -128,12 +128,12 @@ export class Directory {
             // Convert to full paths.
             dirEntries = _.map(
                 dirEntries,
-                (curDirEntry) => { return path.join(this._dirPath, curDirEntry); }
+                (curDirEntry) => path.join(this._dirPath, curDirEntry)
             );
 
             // Map each directory entry into a Promise for an object containing the
             // directory entry's name and its stats.
-            const promises: Promise<{dirEntry: string, stats: Stats}>[] = _.map(
+            const promises: Array<Promise<{dirEntry: string, stats: Stats}>> = _.map(
                 dirEntries,
                 (curDirEntry) => {
                     return statAsync(curDirEntry)
@@ -144,7 +144,7 @@ export class Directory {
             );
             return Promise.all(promises);
         })
-        .then((dirEntryInfos: {dirEntry: string, stats: Stats}[]) => {
+        .then((dirEntryInfos: Array<{dirEntry: string, stats: Stats}>) => {
             // Keep only the directory entries that are files.
             dirEntryInfos = _.filter(dirEntryInfos, (curDirEntryInfo) => {
                 return curDirEntryInfo.stats.isFile();
@@ -173,7 +173,7 @@ export class Directory {
 
         // Map each directory entry to an object containing the directory
         // entry's name and its stats.
-        let dirEntryInfos: {dirEntry: string, stats: Stats}[] = _.map(
+        let dirEntryInfos: Array<{dirEntry: string, stats: Stats}> = _.map(
             dirEntries,
             (curDirEntry: string): {dirEntry: string, stats: Stats} => {
                 const stats: Stats = fs.statSync(curDirEntry);
@@ -283,7 +283,7 @@ export class Directory {
      */
     public emptySync(): void {
         fs.emptyDirSync(this._dirPath);
-    };
+    }
 
 
 }

@@ -21,7 +21,7 @@ export function getCreateDate(imageFile: string): Promise<Datestamp> {
     return new Promise<Datestamp>((resolve, reject) => {
 
         try {
-            // tslint:disable-next-line:no-unused-new
+            // tslint:disable-next-line:no-unused-expression
             new ExifImage({image: imageFile}, (err: any, exifData: any) => {
 
                 if (err) {

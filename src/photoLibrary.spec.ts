@@ -2,7 +2,7 @@ import * as tape from "tape";
 import * as _ from "lodash";
 import {Directory} from "./directory";
 import {Datestamp} from "./datestamp";
-import {PhotoLibrary, DateDirMap} from "./photoLibrary";
+import {PhotoLibrary, IDateDirMap} from "./photoLibrary";
 import {FileTask} from "./fileTask";
 import {File} from "./file";
 

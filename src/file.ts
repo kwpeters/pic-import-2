@@ -280,7 +280,7 @@ export class File {
 
     public writeSync(text: string): void {
         fs.outputFileSync(this._filePath, text);
-    };
+    }
 
 
     public read(): Promise<string> {

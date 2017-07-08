@@ -7,11 +7,11 @@ tape("reducePathParts()",
 
         t.test("should join the path parts",
             function (t: tape.Test): void {
-        
+
                 const resultPath: string = pathHelpers.reducePathParts(["foo", "bar", "baz.txt"]);
                 t.equal(resultPath, "foo/bar/baz.txt");
                 t.end();
-        
+
             }
         );
 

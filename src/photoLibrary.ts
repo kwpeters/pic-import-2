@@ -11,13 +11,12 @@ import {FileTask} from "./fileTask";
 ////////////////////////////////////////////////////////////////////////////////
 // Types
 ////////////////////////////////////////////////////////////////////////////////
-export type DateDirMap = {[s: string]: Directory};
+interface IDateDirMap {
+    [s: string]: Directory;
+}
 
 
 export class PhotoLibrary {
-
-    private _rootDir: Directory;
-    private _dateDirMapPromise: Promise<DateDirMap>;
 
 
     /**
@@ -29,14 +28,14 @@ export class PhotoLibrary {
      * @returns A mapping from date (string) to Directory objects for the photo
      * library directory
      */
-    public static createDateDirMap(libraryDir: Directory): Promise<DateDirMap> {
+    public static createDateDirMap(libraryDir: Directory): Promise<IDateDirMap> {
 
         return libraryDir.getSubdirectories()
         .then((subdirs: Directory[]) => {
             // We are only concerned with the subdirectories that have a date in them.
             return _.reduce(
                 subdirs,
-                (acc: DateDirMap, curSubdir: Directory) => {
+                (acc: IDateDirMap, curSubdir: Directory) => {
                     const datestamp: Datestamp|null = DatestampDir.test(curSubdir.toString());
                     if (datestamp) {
                         acc[datestamp.toString()] = curSubdir;
@@ -48,6 +47,10 @@ export class PhotoLibrary {
         });
 
     }
+
+
+    private _rootDir: Directory;
+    private _dateDirMapPromise: Promise<IDateDirMap>;
 
 
     /**
@@ -78,7 +81,7 @@ export class PhotoLibrary {
         const datestampPromise: Promise<Datestamp> =  getDatestamp(fileToImport);
 
         return Promise.all([datestampPromise, this._dateDirMapPromise])
-        .then(([datestamp, dateDirMap]: [Datestamp, DateDirMap]) => {
+        .then(([datestamp, dateDirMap]: [Datestamp, IDateDirMap]) => {
 
             const datestampStr: string = datestamp.toString();
             let destDir: Directory = dateDirMap[datestampStr];
@@ -105,8 +108,8 @@ export class PhotoLibrary {
      * @method
      * @param {Directory} importDirectory - A directory containing the files to
      * be imported.
-     * @return {Promise<FileTask[]>} A Promise for an array of File objects.  Each
-     * File object represents an imported file.
+     * @return {Promise<FileTask[]>} A Promise for an array of FileTask objects.
+     *  Each FileTask represents a task to be run in order to import a file.
      */
     public importDirectory(importDirectory: Directory): Promise<FileTask[]> {
 
@@ -115,14 +118,11 @@ export class PhotoLibrary {
         return importDirectory.getFiles()
         .then((filesToImport: File[]) => {
 
-            const promises: Promise<FileTask>[] = _.map(filesToImport, (curImportFile) => {
+            const promises: Array<Promise<FileTask>> = _.map(filesToImport, (curImportFile) => {
                 return this.importFile(curImportFile);
             });
 
             return Promise.all(promises);
-        })
-        .then((fileTasks: FileTask[]) => {
-            return fileTasks;
         });
     }
 }
