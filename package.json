@@ -24,7 +24,8 @@
   },
   "scripts": {
     "test": "npm run build && tape dist/**/*.spec.js",
-    "build": "rm -rf ./dist && tsc"
+    "build": "rm -rf ./dist && tsc",
+    "tslint": "tslint -c tslint.json 'src/**/*.ts'"
   },
   "repository": {
     "type": "git",
