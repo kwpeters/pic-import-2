@@ -48,7 +48,7 @@ tape("PhotoLibrary", function (t: tape.Test): void {
                 dirB.ensureExistsSync();
 
                 PhotoLibrary.createDateDirMap(libDir)
-                .then((dateDirMap: DateDirMap) => {
+                .then((dateDirMap: IDateDirMap) => {
                     t.equal(Object.keys(dateDirMap).length, 2);
                     t.equal(dateDirMap["2016-02-20"].toString(), "tmp/lib/2016-02-20");
                     t.equal(dateDirMap["2016-02-21"].toString(), "tmp/lib/2016-02-21");
@@ -68,7 +68,7 @@ tape("PhotoLibrary", function (t: tape.Test): void {
                 dirB.ensureExistsSync();
 
                 PhotoLibrary.createDateDirMap(libDir)
-                .then((dateDirMap: DateDirMap) => {
+                .then((dateDirMap: IDateDirMap) => {
                     t.equal(Object.keys(dateDirMap).length, 2);
                     t.equal(dateDirMap["2016-02-20"].toString(), "tmp/lib/2016-02-20 - event A");
                     t.equal(dateDirMap["2016-02-21"].toString(), "tmp/lib/2016-02-21_event_B");
