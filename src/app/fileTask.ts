@@ -1,6 +1,6 @@
-import {File} from "./file";
-import {Directory} from "./directory";
-import * as Promise from "bluebird";
+import {File} from "../lib/depot/file";
+import {Directory} from "../lib/depot/directory";
+
 
 export enum FileOperation {
     copy,
@@ -9,9 +9,9 @@ export enum FileOperation {
 
 export class FileTask {
 
-    private _srcFile:   File;
-    private _dst:       File|Directory;
-    private _operation: FileOperation;
+    private readonly _srcFile:   File;
+    private readonly _dst:       File|Directory;
+    private readonly _operation: FileOperation;
 
     constructor(srcFile: File, dst: File|Directory, operation: FileOperation = FileOperation.copy) {
         this._srcFile   = srcFile;

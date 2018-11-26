@@ -1,6 +1,6 @@
 import * as Promise from "bluebird";
 import * as _ from "lodash";
-import {File} from "./file";
+import {File} from "../lib/depot/file";
 import {Datestamp} from "./datestamp";
 import {getCreateDate} from "./exifReader";
 import * as fs from "fs";
@@ -47,13 +47,13 @@ export function getDatestampStats(file: File): Promise<Datestamp> {
     "use strict";
 
     return new Promise<Datestamp>((resolve: (result: Datestamp) => void, reject: (err: any) => void) => {
-        fs.stat(file.absPath, (err: NodeJS.ErrnoException, stats: fs.Stats) => {
+        fs.stat(file.absPath(), (err: NodeJS.ErrnoException, stats: fs.Stats) => {
             if (err) {
                 reject(err);
                 return;
             }
 
-            const consideredTimeValues: number[] = [];
+            const consideredTimeValues: Array<number> = [];
             consideredTimeValues.push(stats.atime.valueOf());
             consideredTimeValues.push(stats.mtime.valueOf());
             consideredTimeValues.push(stats.ctime.valueOf());

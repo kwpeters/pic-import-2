@@ -1,6 +1,6 @@
-import {Directory} from "./directory";
-import {File} from "./file";
-import * as Promise from "bluebird";
+import {Directory} from "../lib/depot/directory";
+import {File} from "../lib/depot/file";
+import * as BBPromise from "bluebird";
 import * as _ from "lodash";
 import {Datestamp} from "./datestamp";
 import {DatestampDir} from "./datestampDir";
@@ -26,17 +26,20 @@ export class PhotoLibrary {
      * @param libraryDir - The library directory for which the map is to be
      * generated
      * @returns A mapping from date (string) to Directory objects for the photo
-     * library directory
+     * library directory located in `libraryDir`.
      */
     public static createDateDirMap(libraryDir: Directory): Promise<IDateDirMap> {
 
-        return libraryDir.getSubdirectories()
-        .then((subdirs: Directory[]) => {
+        return libraryDir.contents()
+        .then((contents) => {
+
+            const subdirs = contents.subdirs;
+
             // We are only concerned with the subdirectories that have a date in them.
             return _.reduce(
                 subdirs,
                 (acc: IDateDirMap, curSubdir: Directory) => {
-                    const datestamp: Datestamp|null = DatestampDir.test(curSubdir.toString());
+                    const datestamp = DatestampDir.test(curSubdir.toString());
                     if (datestamp) {
                         acc[datestamp.toString()] = curSubdir;
                     }
@@ -74,26 +77,28 @@ export class PhotoLibrary {
      * this PhotoLibrary.
      * @method
      * @param fileToImport - The file to import
-     * @return {Promise<FileTask>} A Promise for a FileTask that will import the file.
+     * @return A Promise for a FileTask that will import the file.
      */
     public importFile(fileToImport: File): Promise<FileTask> {
 
         const datestampPromise: Promise<Datestamp> =  getDatestamp(fileToImport);
 
-        return Promise.all([datestampPromise, this._dateDirMapPromise])
-        .then(([datestamp, dateDirMap]: [Datestamp, IDateDirMap]) => {
-
+        return BBPromise.all([datestampPromise, this._dateDirMapPromise])
+        .then(([datestamp, dateDirMap]) => {
             const datestampStr: string = datestamp.toString();
             let destDir: Directory = dateDirMap[datestampStr];
 
             if (destDir) {
                 // A directory already exists for the file.  Use it.
-                return Promise.resolve(destDir);
+                return destDir;
             } else {
                 // A directory does not exist for the file being imported.
                 // Create it.
                 destDir = new Directory(this._rootDir, datestampStr);
-                return destDir.ensureExists();
+                return destDir.ensureExists()
+                .then(() => {
+                    return destDir;
+                });
             }
         })
         .then((destDir: Directory) => {
@@ -108,21 +113,16 @@ export class PhotoLibrary {
      * @method
      * @param {Directory} importDirectory - A directory containing the files to
      * be imported.
-     * @return {Promise<FileTask[]>} A Promise for an array of FileTask objects.
-     *  Each FileTask represents a task to be run in order to import a file.
+     * @return A Promise for an array of FileTask objects. Each FileTask
+     * represents a task to be run in order to import a file.
      */
-    public importDirectory(importDirectory: Directory): Promise<FileTask[]> {
-
+    public importDirectory(importDirectory: Directory): Promise<Array<FileTask>> {
         // todo:  Add a parameter to recursively find all files in importDirectory.
 
-        return importDirectory.getFiles()
-        .then((filesToImport: File[]) => {
-
-            const promises: Array<Promise<FileTask>> = _.map(filesToImport, (curImportFile) => {
-                return this.importFile(curImportFile);
-            });
-
-            return Promise.all(promises);
+        return importDirectory.contents()
+        .then((result) => {
+            const promises = _.map(result.files, (curFile) => this.importFile(curFile));
+            return BBPromise.all<FileTask>(promises);
         });
     }
 }
